@@ -21,7 +21,7 @@ import java.util.Map;
 
 public interface CommonExecutionEngine<O extends Embedding> {
 
-    void processExpansion(O expansion);
+    void processModification(O expansion);
 
     <A extends Writable> A getAggregatedValue(String name);
 

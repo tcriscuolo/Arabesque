@@ -143,7 +143,7 @@ case class SparkODAGEngine[O <: Embedding](
   }
 
   /**
-   * It does the computation of this module, i.e., expand/compute
+   * It does the computation of this module, i.e., modify/compute
    *
    * @param inboundStashes iterator of ODAG stashes
    */
@@ -163,7 +163,7 @@ case class SparkODAGEngine[O <: Embedding](
     if (superstep == 0) { // bootstrap
 
       val initialEmbedd: O = configuration.createEmbedding()
-      computation.expand (initialEmbedd)
+      computation.modify (initialEmbedd)
 
     } else {
       var hasNext = true
@@ -180,11 +180,11 @@ case class SparkODAGEngine[O <: Embedding](
   }
 
   /**
-   * Calls computation to expand an embedding
+   * Calls computation to modify an embedding
    *
    * @param embedding embedding to be expanded
    */
-  def internalCompute(embedding: O) = computation.expand (embedding)
+  def internalCompute(embedding: O) = computation.modify (embedding)
 
   /**
    * Reads next embedding from previous ODAGs
@@ -391,7 +391,7 @@ case class SparkODAGEngine[O <: Embedding](
   }
 
   /**
-   * Called whenever an embedding survives the expand/filter process and must be
+   * Called whenever an embedding survives the modify/filter process and must be
    * carried on to the next superstep
    *
    * @param embedding embedding that must be processed

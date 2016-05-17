@@ -269,7 +269,7 @@ public class DomainStorageReadOnly extends DomainStorage {
                 }
             }
 
-            return computation.filter(reusableEmbedding) && computation.shouldExpand(reusableEmbedding);
+            return computation.filter(reusableEmbedding) && computation.shouldModify(reusableEmbedding);
         }
 
         public boolean getEnumerationWithStack(int targetSize) {

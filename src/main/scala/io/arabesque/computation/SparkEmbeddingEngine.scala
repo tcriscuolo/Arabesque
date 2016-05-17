@@ -110,7 +110,7 @@ case class SparkEmbeddingEngine[O <: Embedding](
   }
 
   /**
-   * It does the computation of this module, i.e., expand/compute
+   * It does the computation of this module, i.e., modify/compute
    *
    * @param inboundCaches
    */
@@ -130,7 +130,7 @@ case class SparkEmbeddingEngine[O <: Embedding](
     if (superstep == 0) { // bootstrap
 
       val initialEmbedd: O = configuration.createEmbedding()
-      computation.expand (initialEmbedd)
+      computation.modify (initialEmbedd)
 
     } else {
       var hasNext = true
@@ -147,11 +147,11 @@ case class SparkEmbeddingEngine[O <: Embedding](
   }
 
   /**
-   * Calls computation to expand an embedding
+   * Calls computation to modify an embedding
    *
    * @param embedding embedding to be expanded
    */
-  def internalCompute(embedding: O) = computation.expand (embedding)
+  def internalCompute(embedding: O) = computation.modify (embedding)
 
   /**
    * Reads next embedding from previous caches
@@ -205,8 +205,7 @@ case class SparkEmbeddingEngine[O <: Embedding](
    * Flushes a given aggregation.
    *
    * @param name name of the aggregation
-   *
-   * @return iterator of aggregation storages
+    * @return iterator of aggregation storages
    * TODO: split aggregations before flush them and review the return type
    */
   def flushAggregationsByName(name: String) = {
@@ -224,7 +223,7 @@ case class SparkEmbeddingEngine[O <: Embedding](
   }
 
   /**
-   * Called whenever an embedding survives the expand/filter process and must be
+   * Called whenever an embedding survives the modify/filter process and must be
    * carried on to the next superstep
    *
    * @param embedding embedding that must be processed
@@ -255,8 +254,7 @@ case class SparkEmbeddingEngine[O <: Embedding](
    * engine.
    *
    * @param name name of the aggregation
-   *
-   * @return the aggregated value or null if no aggregation was found
+    * @return the aggregated value or null if no aggregation was found
    */
   override def getAggregatedValue[A <: Writable](name: String): A =
     previousAggregationsBc.value.asInstanceOf[Map[String,A]].get(name) match {

@@ -25,7 +25,9 @@ public abstract class BasicEmbedding implements Embedding {
 
     // Extension helper structures {{
     protected HashIntSet extensionWordIds;
+    protected HashIntSet contractionWordIds;
     protected boolean dirtyExtensionWordIds;
+    protected boolean dirtyContractibleWordIds;
     protected ObjArrayList<IntArrayList> extensionWordIdsPerPos;
     protected IntArrayList previousExtensionCalculationVertices;
 
@@ -33,6 +35,13 @@ public abstract class BasicEmbedding implements Embedding {
         @Override
         public void accept(int i) {
             extensionWordIds.add(i);
+        }
+    };
+
+    private IntConsumer contractionWordIdsAdder = new IntConsumer() {
+        @Override
+        public void accept(int i) {
+            contractionWordIds.add(i);
         }
     };
 
@@ -98,6 +107,7 @@ public abstract class BasicEmbedding implements Embedding {
     protected void setDirty() {
         dirtyPattern = true;
         dirtyExtensionWordIds = true;
+        dirtyContractibleWordIds = true;
     }
 
     @Override
@@ -140,6 +150,16 @@ public abstract class BasicEmbedding implements Embedding {
         return extensionWordIds;
     }
 
+    @Override
+    public IntCollection getContractibleWordIds() {
+        // If we have to recompute the contractionVertexIds set
+        if (dirtyContractibleWordIds) {
+            updateContractibleWordIdsSimple();
+        }
+
+        return contractionWordIds;
+    }
+
     protected void updateExtensibleWordIdsSimple() {
         IntArrayList vertices = getVertices();
         int numVertices = getNumVertices();
@@ -147,10 +167,10 @@ public abstract class BasicEmbedding implements Embedding {
         extensionWordIds.clear();
 
         for (int i = 0; i < numVertices; ++i) {
-            IntCollection neighbourhood = getValidNeighboursForExpansion(vertices.getUnchecked(i));
+            IntCollection elements = getValidElementsForExpansion(vertices.getUnchecked(i));
 
-            if (neighbourhood != null) {
-                neighbourhood.forEach(extensionWordIdsAdder);
+            if (elements != null) {
+                elements.forEach(extensionWordIdsAdder);
             }
         }
 
@@ -162,6 +182,22 @@ public abstract class BasicEmbedding implements Embedding {
             int wId = words.getUnchecked(i);
             extensionWordIds.removeInt(wId);
         }
+    }
+
+    protected void updateContractibleWordIdsSimple() {
+        IntArrayList vertices = getVertices();
+
+        contractionWordIds.clear();
+
+        IntCollection elements = getValidElementsForContraction(vertices.getUnchecked(0));
+
+        if (elements != null)
+          elements.forEach(contractionWordIdsAdder);
+    }
+
+    public boolean existWord(int wordId) {
+        IntArrayList words = getWords();
+        return words.contains(wordId);
     }
 
     @Override
@@ -202,7 +238,9 @@ public abstract class BasicEmbedding implements Embedding {
 
     protected abstract boolean areWordsNeighbours(int wordId1, int wordId2);
 
-    protected abstract IntCollection getValidNeighboursForExpansion(int vId);
+    protected abstract IntCollection getValidElementsForExpansion(int vId);
+
+    protected abstract IntCollection getValidElementsForContraction(int vId);
 
     @Override
     public void addWord(int word) {
@@ -213,6 +251,9 @@ public abstract class BasicEmbedding implements Embedding {
     public void removeLastWord() {
         setDirty();
     }
+
+    @Override
+    public void removeWord(int word) { setDirty(); }
 
     @Override
     public String toString() {

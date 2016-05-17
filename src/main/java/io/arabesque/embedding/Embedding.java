@@ -30,7 +30,11 @@ public interface Embedding extends WritableObject, Externalizable {
 
     void removeLastWord();
 
+    void removeWord(int word);
+
     IntCollection getExtensibleWordIds();
+
+    IntCollection getContractibleWordIds();
 
     boolean isCanonicalEmbeddingWithWord(int wordId);
 

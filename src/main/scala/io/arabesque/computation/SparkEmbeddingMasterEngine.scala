@@ -208,7 +208,7 @@ class SparkEmbeddingMasterEngine[E <: Embedding]
       aggAccums: Map[String,Accumulator[_]],
       previousAggregationsBc: Broadcast[_]) = {
 
-    // read embeddings from embedding caches, expand, filter and process
+    // read embeddings from embedding caches, modify, filter and process
     val execEngines = superstepRDD.mapPartitionsWithIndex { (idx, cacheIter) =>
 
       configBc.value.initialize()

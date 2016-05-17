@@ -67,7 +67,7 @@ public class EdgeInducedEmbedding extends BasicEmbedding {
     }
 
     @Override
-    protected IntCollection getValidNeighboursForExpansion(int vertexId) {
+    protected IntCollection getValidElementsForExpansion(int vertexId) {
         return mainGraph.getVertexNeighbourhood(vertexId).getNeighbourEdges();
     }
 

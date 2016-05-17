@@ -273,7 +273,7 @@ class SparkODAGMasterEngine[E <: Embedding](config: SparkConfiguration[E])
       aggAccums: Map[String,Accumulator[_]],
       previousAggregationsBc: Broadcast[_]) = {
 
-    // read embeddings from global agg. ODAGs, expand, filter and process
+    // read embeddings from global agg. ODAGs, modify, filter and process
     val execEngines = superstepRDD.mapPartitionsWithIndex { (idx, _) =>
 
       configBc.value.initialize()

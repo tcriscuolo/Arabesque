@@ -18,12 +18,12 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
 
     private boolean outputEnabled;
 
-    private CommonExecutionEngine<E> underlyingExecutionEngine;
+    protected CommonExecutionEngine<E> underlyingExecutionEngine;
     private MainGraph mainGraph;
     private Configuration configuration;
-    private IntConsumer expandConsumer;
-    private long numChildrenEvaluated = 0;
-    private E currentEmbedding;
+    private IntConsumer modifyConsumer;
+    protected long numChildrenEvaluated = 0;
+    protected E currentEmbedding;
 
     @Override
     public final void setUnderlyingExecutionEngine(CommonExecutionEngine<E> underlyingExecutionEngine) {
@@ -40,10 +40,10 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
 
     @Override
     public void init() {
-        expandConsumer = new IntConsumer() {
+        modifyConsumer = new IntConsumer() {
             @Override
             public void accept(int wordId) {
-                doExpandFilter(wordId);
+                doModifyFilter(wordId);
             }
         };
 
@@ -59,59 +59,64 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
     }
 
     @Override
-    public void expand(E embedding) {
+    public void modify(E embedding) {
         if (getStep() > 0) {
             if (!aggregationFilter(embedding)) {
                 return;
             }
-
             aggregationProcess(embedding);
         }
 
-        IntCollection possibleExtensions = getPossibleExtensions(embedding);
+        IntCollection possibleModifications = getPossibleModifications(embedding);
         
-        if (possibleExtensions != null) {
-            filter(embedding, possibleExtensions);
+        if (possibleModifications != null) {
+            filter(embedding, possibleModifications);
         }
 
-        if (possibleExtensions == null || possibleExtensions.isEmpty()) {
-            handleNoExpansions(embedding);
+        if (possibleModifications == null || possibleModifications.isEmpty()) {
+            handleNoModifications(embedding);
             return;
         }
 
         currentEmbedding = embedding;
-        possibleExtensions.forEach(expandConsumer);
+        possibleModifications.forEach(modifyConsumer);
     }
 
-    private void doExpandFilter(int wordId) {
+    protected void doModifyFilter(int wordId) {
         if (filter(currentEmbedding, wordId)) {
             currentEmbedding.addWord(wordId);
 
             if (filter(currentEmbedding)) {
-                if (shouldExpand(currentEmbedding)) {
-                    underlyingExecutionEngine.processExpansion(currentEmbedding);
+                if (shouldModify(currentEmbedding)) {
+                    underlyingExecutionEngine.processModification(currentEmbedding);
                 }
 
                 numChildrenEvaluated++;
                 process(currentEmbedding);
             }
-
             currentEmbedding.removeLastWord();
         }
-
     }
 
     @Override
-    public void handleNoExpansions(E embedding) {
+    public void handleNoModifications(E embedding) {
         // Empty by default
     }
 
-    private IntCollection getPossibleExtensions(E embedding) {
+    public IntCollection getPossibleExtensions(E embedding) {
         if (embedding.getNumWords() > 0) {
             return embedding.getExtensibleWordIds();
         } else {
             return getInitialExtensions();
         }
+    }
+
+    public IntCollection getPossibleContractions(E embedding) {
+        return embedding.getContractibleWordIds();
+    }
+
+    protected IntCollection getPossibleModifications(E embedding) {
+        return getPossibleExtensions(embedding);
     }
 
     protected HashIntSet getInitialExtensions() {
@@ -141,12 +146,12 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
     protected abstract int getInitialNumWords();
 
     @Override
-    public boolean shouldExpand(E embedding) {
+    public boolean shouldModify(E embedding) {
         return true;
     }
 
     @Override
-    public void filter(E existingEmbedding, IntCollection extensionPoints) {
+    public void filter(E existingEmbedding, IntCollection modificationPoints) {
         // Do nothing by default
     }
 
