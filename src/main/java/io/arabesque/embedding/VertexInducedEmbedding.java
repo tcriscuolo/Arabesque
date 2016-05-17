@@ -254,4 +254,9 @@ public class VertexInducedEmbedding extends BasicEmbedding {
             ++numAdded;
         }
     }
+
+    @Override
+    public int getTotalNumWords(){
+        return mainGraph.getNumberVertices();
+    }
 }

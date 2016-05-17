@@ -166,6 +166,13 @@ public abstract class BasicEmbedding implements Embedding {
 
         extensionWordIds.clear();
 
+        if (numVertices==0) {
+            int totalNumWords = getTotalNumWords();
+            for (int i = 0; i < totalNumWords; ++i)
+                extensionWordIds.add(i);
+            return;
+        }
+
         for (int i = 0; i < numVertices; ++i) {
             IntCollection elements = getValidElementsForExpansion(vertices.getUnchecked(i));
 
@@ -237,6 +244,8 @@ public abstract class BasicEmbedding implements Embedding {
     }
 
     protected abstract boolean areWordsNeighbours(int wordId1, int wordId2);
+
+    protected abstract int getTotalNumWords();
 
     protected abstract IntCollection getValidElementsForExpansion(int vId);
 

@@ -10,10 +10,8 @@ public class MotifSamplingComputation extends VertexInducedSamplingComputation<V
     public static final String AGG_MOTIFS = "motifs";
     private static final String MAXSIZE = "arabesque.motif.maxsize";
     private static final String MAXSTEP = "arabesque.motif.maxiteration";
-    private static final String SAMPLESIZE = "arabesque.motif.samplesize";
     private static final int MAXSIZE_DEFAULT = 4;
     private static final int MAXTSTEP_DEFAULT = 10;
-    private static final int SAMPLESIZE_DEFAULT = 100;
 
 
     private static LongWritable reusableLongWritableUnit = new LongWritable(1);

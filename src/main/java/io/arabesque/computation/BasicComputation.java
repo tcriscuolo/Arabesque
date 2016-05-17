@@ -5,6 +5,7 @@ import io.arabesque.conf.Configuration;
 import io.arabesque.embedding.Embedding;
 import io.arabesque.graph.MainGraph;
 import io.arabesque.pattern.Pattern;
+import io.arabesque.utils.collection.IntArrayList;
 import net.openhft.koloboke.collect.IntCollection;
 import net.openhft.koloboke.collect.set.hash.HashIntSet;
 import net.openhft.koloboke.collect.set.hash.HashIntSets;
@@ -104,7 +105,7 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
     }
 
     public IntCollection getPossibleExtensions(E embedding) {
-        if (embedding.getNumWords() > 0) {
+        if (getStep() > 0) {
             return embedding.getExtensibleWordIds();
         } else {
             return getInitialExtensions();
@@ -119,7 +120,7 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
         return getPossibleExtensions(embedding);
     }
 
-    protected HashIntSet getInitialExtensions() {
+    protected IntArrayList getInitialExtensions() {
         int totalNumWords = getInitialNumWords();
         int numPartitions = getNumberPartitions();
         int myPartitionId = getPartitionId();
@@ -133,9 +134,7 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
             endMyWordRange = totalNumWords;
         }
 
-        // TODO: Replace this by a list implementing IntCollection. No need for set.
-        HashIntSet initialExtensions = HashIntSets.newMutableSet(numWordsPerPartition);
-
+        IntArrayList initialExtensions = new IntArrayList();
         for (int i = startMyWordRange; i < endMyWordRange; ++i) {
             initialExtensions.add(i);
         }

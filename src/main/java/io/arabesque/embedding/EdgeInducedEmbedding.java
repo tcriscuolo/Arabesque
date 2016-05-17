@@ -1,6 +1,7 @@
 package io.arabesque.embedding;
 
 import io.arabesque.graph.Edge;
+import io.arabesque.graph.MainGraph;
 import io.arabesque.utils.collection.IntArrayList;
 import net.openhft.koloboke.collect.IntCollection;
 
@@ -69,6 +70,12 @@ public class EdgeInducedEmbedding extends BasicEmbedding {
     @Override
     protected IntCollection getValidElementsForExpansion(int vertexId) {
         return mainGraph.getVertexNeighbourhood(vertexId).getNeighbourEdges();
+    }
+
+    //TODO: Make this work.
+    @Override
+    protected IntCollection getValidElementsForContraction(int vId) {
+        return null;
     }
 
     @Override
@@ -147,5 +154,10 @@ public class EdgeInducedEmbedding extends BasicEmbedding {
     @Override
     public void readExternal(ObjectInput objInput) throws IOException, ClassNotFoundException {
        readFields(objInput);
+    }
+
+    @Override
+    public int getTotalNumWords(){
+        return mainGraph.getNumberEdges();
     }
 }
