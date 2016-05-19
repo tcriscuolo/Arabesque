@@ -167,7 +167,6 @@ public class VertexInducedEmbedding extends BasicEmbedding {
 
     @Override
     public void removeWord(int word) {
-
         if (getNumVertices() == 0) {
             return;
         }
@@ -175,20 +174,14 @@ public class VertexInducedEmbedding extends BasicEmbedding {
         IntArrayList words = getWords();
         int numWords = words.size();
 
-        //if the word is the last one
-        if (word == words.getUnchecked(numWords-1)) {
-            removeLastWord();
+        int idx = 0;
+        while (idx < numWords-1) {
+            if (word == words.getUnchecked(idx))
+                break;
+            idx++;
         }
-        else {
-            int idx = 0;
-            while (idx < numWords-1) {
-                if (word == words.getUnchecked(idx))
-                    break;
-                idx++;
-            }
-            updateEdgesDeletion(idx);
-            vertices.remove (idx);
-        }
+        updateEdgesDeletion(idx);
+        vertices.remove (idx);
 
         super.removeWord(word);
     }

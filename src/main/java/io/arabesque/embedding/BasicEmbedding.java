@@ -312,6 +312,10 @@ public abstract class BasicEmbedding implements Embedding {
         return pattern;
     }
 
+    public int getLastWord(){
+        return getWords().getLast();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

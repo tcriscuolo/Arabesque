@@ -48,7 +48,7 @@ public abstract class VertexInducedSamplingComputation<E extends VertexInducedEm
                     embeddingNeighborhoodSize += degree;
                     degrees.add(new IntIntPair(wordId, degree));
                 }
-                currentEmbedding.removeLastWord();
+                currentEmbedding.removeWord(currentEmbedding.getLastWord());
             }
             //if contraction
             else {
@@ -85,7 +85,7 @@ public abstract class VertexInducedSamplingComputation<E extends VertexInducedEm
             }
             numChildrenEvaluated++;
             process(currentEmbedding);
-            currentEmbedding.removeLastWord();
+            currentEmbedding.removeWord(currentEmbedding.getLastWord());
         }
         //if contraction
         else {
