@@ -26,6 +26,12 @@ public class EdgeInducedEmbedding extends BasicEmbedding {
     }
 
     @Override
+    public void setFromEmbedding(Embedding other) {
+       super.setFromEmbedding(other);
+       numVerticesAddedWithWord = other.getNumWordsAddedWithWord();
+    }
+
+    @Override
     public IntArrayList getWords() {
         return getEdges();
     }
@@ -51,6 +57,11 @@ public class EdgeInducedEmbedding extends BasicEmbedding {
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public IntArrayList getNumWordsAddedWithWord() {
+       return numVerticesAddedWithWord;
     }
 
     @Override

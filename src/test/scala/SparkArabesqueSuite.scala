@@ -17,7 +17,7 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
   import Configuration._
   import SparkConfiguration._
 
-  private val master = "local[2]"
+  private val master = "local[*]"
   private val appName = "arabesque-spark"
   
   private var sampleGraphPath: String = _
@@ -28,11 +28,11 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
   /** set up spark context */
   override def beforeAll: Unit = {
     // configure log levels
-    import org.apache.log4j.Logger
-    import org.apache.log4j.Level
-    Logger.getLogger("org").setLevel(Level.ERROR)
-    Logger.getLogger("akka").setLevel(Level.ERROR)
-    Logger.getLogger("io").setLevel(Level.ERROR)
+    //import org.apache.log4j.Logger
+    //import org.apache.log4j.Level
+    //Logger.getLogger("org").setLevel(Level.ERROR)
+    //Logger.getLogger("akka").setLevel(Level.ERROR)
+    //Logger.getLogger("io").setLevel(Level.ERROR)
 
     // spark conf and context
     val conf = new SparkConf().
@@ -95,6 +95,31 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
 
     assert (conds.reduce (_ && _))
     
+  }
+
+  test ("[motifs,embedding,sampling] arabesque API") {
+    val start = System.currentTimeMillis
+    val motifsRes = arabGraph.motifsSampling (3, 3, 10000).
+      set ("log_level", "debug").
+      set ("comm_strategy", COMM_EMBEDDING)
+    //motifsRes.saveEmbeddingsAsTextFile ("file:///tmp/sampling.embeddings")
+    val odags = motifsRes.odags
+    assert (odags.count == 0)
+    val embeddings = motifsRes.embeddings
+    val end = System.currentTimeMillis
+    println (s"elapsed time [motifs,embedding,sampling]: ${end - start}ms")
+  }
+  test ("[motifs,embedding,nosampling] arabesque API") {
+    val start = System.currentTimeMillis
+    val motifsRes = arabGraph.motifs (3).
+      set ("log_level", "debug").
+      set ("comm_strategy", COMM_EMBEDDING)
+    //motifsRes.saveEmbeddingsAsTextFile ("file:///tmp/nosampling.embeddings")
+    val odags = motifsRes.odags
+    assert (odags.count == 0)
+    val embeddings = motifsRes.embeddings
+    val end = System.currentTimeMillis
+    println (s"elapsed time [motifs,embedding,nosampling]: ${end - start}ms")
   }
 
   val motifsNumEmbeddings = 24546

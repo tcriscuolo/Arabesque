@@ -138,6 +138,9 @@ class SparkEmbeddingMasterEngine[E <: Embedding]
       // the superstep
       execEngines.persist (MEMORY_AND_DISK_SER)
 
+      execEngines.foreachPartition ( _ => {})
+      superstepRDD.unpersist()
+
       /** [1] We extract and aggregate the *aggregations* globally.
        */
 
@@ -151,7 +154,7 @@ class SparkEmbeddingMasterEngine[E <: Embedding]
           
           logInfo (s"""Aggregations and sizes
             ${aggregations.
-            map(tup => (tup._1,tup._2.getNumberMappings)).mkString("\n")}
+            map(tup => (tup._1,tup._2)).mkString("\n")}
           """)
 
           previousAggregationsBc.unpersist()
@@ -170,7 +173,9 @@ class SparkEmbeddingMasterEngine[E <: Embedding]
       superstepRDD = execEngines.
         flatMap (_.flush).
         partitionBy (new HashPartitioner (numPartitions)).
-        values
+        values.cache
+
+      superstepRDD.foreachPartition (_ => {})
       
       // whether the user chose to customize master computation, executed every
       // superstep

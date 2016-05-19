@@ -1,6 +1,7 @@
 package io.arabesque.embedding;
 
 import io.arabesque.utils.collection.IntArrayList;
+import io.arabesque.graph.Edge;
 import net.openhft.koloboke.collect.IntCollection;
 import net.openhft.koloboke.collect.set.hash.HashIntSet;
 import net.openhft.koloboke.collect.set.hash.HashIntSets;
@@ -41,6 +42,17 @@ public class VertexInducedEmbedding extends BasicEmbedding {
     @Override
     public int getNumWords() {
         return getNumVertices();
+    }
+
+    @Override
+    public IntArrayList getNumWordsAddedWithWord() {
+       return numEdgesAddedWithWord;
+    }
+
+    @Override
+    public void setFromEmbedding(Embedding other) {
+       super.setFromEmbedding(other);
+       numEdgesAddedWithWord = other.getNumWordsAddedWithWord();
     }
 
     @Override
@@ -90,7 +102,8 @@ public class VertexInducedEmbedding extends BasicEmbedding {
         }
 
         HashIntSet bridgeElems = HashIntSets.newMutableSet();
-        dfsForBridgeDetection(vertexId, vertexId, low, pre, dgr, bridgeElems, cnt);
+        // TODO: can I consider it begins at position 0 ???
+        dfsForBridgeDetection(0, 0, low, pre, dgr, bridgeElems, cnt);
         IntCollection elems = new IntArrayList();
 
         for (int i = 0; i < numVertices; ++i) {
@@ -104,15 +117,20 @@ public class VertexInducedEmbedding extends BasicEmbedding {
     private void dfsForBridgeDetection(int u, int v, int[] low, int[] pre, int[] dgr, HashIntSet elems, Integer cnt) {
         pre[v] = cnt++;
         low[v] = pre[v];
-        for (int w : vertices) {
-            if (areWordsNeighbours(w, v)) {
+        //for (int w : vertices) {
+        for (int w = 0; w < vertices.size(); w++) {
+            //if (areWordsNeighbours(w, v)) {
+            if (areWordsNeighbours(vertices.getUnchecked(w),
+                     vertices.getUnchecked(v))) {
                 dgr[v]++;
                 if (pre[w] == -1) {
                     dfsForBridgeDetection(v, w, low, pre, dgr, elems, cnt);
                     low[v] = Math.min(low[v], low[w]);
                     if (low[w] == pre[w]) {
-                        elems.add(v);
-                        elems.add(w);
+                        //elems.add(v);
+                        elems.add(vertices.getUnchecked(v));
+                        //elems.add(w);
+                        elems.add(vertices.getUnchecked(w));
                     }
                 }
                 // update low number - ignore reverse of edge leading to v
@@ -169,6 +187,7 @@ public class VertexInducedEmbedding extends BasicEmbedding {
                 idx++;
             }
             updateEdgesDeletion(idx);
+            vertices.remove (idx);
         }
 
         super.removeWord(word);
@@ -220,18 +239,29 @@ public class VertexInducedEmbedding extends BasicEmbedding {
      * @param positionDeleted the idx of the vertex that was just deleted.
      */
     private void updateEdgesDeletion(int positionDeleted) {
-        int deletedEdges = numEdgesAddedWithWord.getUnchecked(positionDeleted);
-        int firstIdx = 0;
+        //int firstIdx = 0;
 
-        //compute first edge idx to be deleted
-        for (int i = 0; i < positionDeleted; ++i) {
-            firstIdx += numEdgesAddedWithWord.getUnchecked(i);
-        }
+        ////compute first edge idx to be deleted
+        //for (int i = 0; i <= positionDeleted; ++i) {
+        //    firstIdx += numEdgesAddedWithWord.getUnchecked(i);
+        //}
 
-        //TODO: make a efficient deletion for a range of indexes
-        // For each edge test if it needs to be deleted
-        for (int i = firstIdx; i < firstIdx+deletedEdges; ++i) {
-            edges.remove(i);
+        //int j = firstIdx, i = positionDeleted+1;
+        int j = 0, i = 0;
+        while (i < getNumWords()) {
+           int target = j + numEdgesAddedWithWord.getUnchecked(i);
+           while (j < target) {
+              Edge edge = mainGraph.getEdge(edges.getUnchecked(j));
+              if (edge.hasVertex(vertices.getUnchecked(positionDeleted))) {
+                 edges.remove(j);
+                 int newNumEdgesAdded = numEdgesAddedWithWord.getUnchecked(i) - 1;
+                 numEdgesAddedWithWord.setUnchecked(i, newNumEdgesAdded);
+                 target--;
+              } else {
+                 j++;
+              }
+           }
+           i++;
         }
 
         numEdgesAddedWithWord.remove(positionDeleted);

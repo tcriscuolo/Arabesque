@@ -88,6 +88,7 @@ public abstract class BasicEmbedding implements Embedding {
         mainGraph = Configuration.get().getMainGraph();
 
         extensionWordIds = HashIntSets.newMutableSet();
+        contractionWordIds = HashIntSets.newMutableSet();
         previousExtensionCalculationVertices = new IntArrayList();
 
         extensionWordIdsPerPos = new ObjArrayList<>();
@@ -108,6 +109,13 @@ public abstract class BasicEmbedding implements Embedding {
         dirtyPattern = true;
         dirtyExtensionWordIds = true;
         dirtyContractibleWordIds = true;
+    }
+
+    @Override
+    public void setFromEmbedding(Embedding other) {
+       vertices = other.getVertices();
+       edges = other.getEdges();
+       setDirty();
     }
 
     @Override
@@ -147,7 +155,12 @@ public abstract class BasicEmbedding implements Embedding {
             updateExtensibleWordIdsSimple();
         }
 
+        for (int w : extensionWordIds) {
+           assert (!existWord(w));
+        }
+
         return extensionWordIds;
+        //return HashIntSets.newMutableSet(extensionWordIds.toIntArray());
     }
 
     @Override
@@ -193,8 +206,12 @@ public abstract class BasicEmbedding implements Embedding {
 
     protected void updateContractibleWordIdsSimple() {
         IntArrayList vertices = getVertices();
+        int numVertices = getNumVertices();
 
         contractionWordIds.clear();
+
+        // if embedding has no vertices, there is not contractions possible
+        if (numVertices == 0) return;
 
         IntCollection elements = getValidElementsForContraction(vertices.getUnchecked(0));
 
@@ -205,6 +222,15 @@ public abstract class BasicEmbedding implements Embedding {
     public boolean existWord(int wordId) {
         IntArrayList words = getWords();
         return words.contains(wordId);
+    }
+
+    public boolean existDuplicateWord() {
+       HashIntSet set = HashIntSets.newMutableSet ();
+       for (int w : getWords()) {
+          if(!set.add(w))
+             return true;
+       }
+       return false;
     }
 
     @Override

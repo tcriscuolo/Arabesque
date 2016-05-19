@@ -396,14 +396,14 @@ case class SparkODAGEngine[O <: Embedding](
    *
    * @param embedding embedding that must be processed
    */
-  def addOutboundEmbedding(embedding: O) = processExpansion (embedding)
+  def addOutboundEmbedding(embedding: O) = processModification (embedding)
 
   /**
    * Adds an expansion (embedding) to the outbound odags.
    *
    * @param expansion embedding to be added to the stash of outbound odags
    */
-  override def processExpansion(expansion: O) = {
+  override def processModification(expansion: O) = {
     nextEmbeddingStash.addEmbedding (expansion)
     numEmbeddingsGenerated += 1
   }

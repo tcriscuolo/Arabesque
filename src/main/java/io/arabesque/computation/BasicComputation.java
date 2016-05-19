@@ -60,7 +60,8 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
     }
 
     @Override
-    public void modify(E embedding) {
+    public synchronized void modify(E embedding) {
+        currentEmbedding = embedding;
         if (getStep() > 0) {
             if (!aggregationFilter(embedding)) {
                 return;
@@ -70,7 +71,7 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
 
         IntCollection possibleModifications = getPossibleModifications(embedding);
         
-        if (possibleModifications != null) {
+        if (possibleModifications != null && getStep() > 0) {
             filter(embedding, possibleModifications);
         }
 
@@ -79,7 +80,6 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
             return;
         }
 
-        currentEmbedding = embedding;
         possibleModifications.forEach(modifyConsumer);
     }
 
@@ -105,7 +105,7 @@ public abstract class BasicComputation<E extends Embedding> implements Computati
     }
 
     public IntCollection getPossibleExtensions(E embedding) {
-        if (getStep() > 0) {
+        if (getStep() > 0 || embedding.getNumWords() > 0) {
             return embedding.getExtensibleWordIds();
         } else {
             return getInitialExtensions();
