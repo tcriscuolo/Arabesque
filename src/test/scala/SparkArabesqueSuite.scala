@@ -109,6 +109,7 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
     val end = System.currentTimeMillis
     println (s"elapsed time [motifs,embedding,sampling]: ${end - start}ms")
   }
+
   test ("[motifs,embedding,nosampling] arabesque API") {
     val start = System.currentTimeMillis
     val motifsRes = arabGraph.motifs (3).
