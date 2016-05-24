@@ -49,8 +49,6 @@ public class MotifSamplingComputation extends VertexInducedSamplingComputation<V
               embedding.getNumWords() >= 3 && embedding.getNumWords() <= 5) {
             output(embedding);
             map(AGG_MOTIFS, embedding.getPattern(), reusableLongWritableUnit);
-            System.out.println ("numWords = " + embedding.getNumWords() +
-                  " " + embedding);
         }
     }
     
@@ -60,7 +58,6 @@ public class MotifSamplingComputation extends VertexInducedSamplingComputation<V
 
        if (embedding.getNumWords() <= 3) {
           possibleModifications = getPossibleExtensions(embedding);
-          System.out.println ("size3 " + possibleModifications);
        } else if (embedding.getNumWords() == 4) {
           possibleModifications = getPossibleExtensions(embedding);
           possibleModifications.addAll(getPossibleContractions(embedding));
