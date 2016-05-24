@@ -58,7 +58,7 @@ class ArabesqueGraph(
    *
    * @return an [[io.arabesque.ArabesqueResult]] carrying embeddings
    */
-  def motifsSampling(maxSize: Int, maxStep: Int, sampleSize: Int)
+  def motifsSampling(maxSize: Int, aggStep: Int, maxStep: Int, sampleSize: Int)
       : ArabesqueResult = {
     Configuration.unset
     val config = new SparkConfiguration
@@ -68,6 +68,7 @@ class ArabesqueGraph(
     config.set ("arabesque.motif.maxsize", maxSize)
     config.set ("arabesque.motif.maxstep", maxStep)
     config.set ("arabesque.motif.samplesize", sampleSize)
+    config.set ("arabesque.motif.aggstep", aggStep)
     config.set ("computation",
       "io.arabesque.gmlib.motif.sampling.MotifSamplingComputation")
     motifs (config)

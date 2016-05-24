@@ -155,10 +155,6 @@ public abstract class BasicEmbedding implements Embedding {
             updateExtensibleWordIdsSimple();
         }
 
-        for (int w : extensionWordIds) {
-           assert (!existWord(w));
-        }
-
         return extensionWordIds;
         //return HashIntSets.newMutableSet(extensionWordIds.toIntArray());
     }
@@ -202,6 +198,7 @@ public abstract class BasicEmbedding implements Embedding {
             int wId = words.getUnchecked(i);
             extensionWordIds.removeInt(wId);
         }
+
     }
 
     protected void updateContractibleWordIdsSimple() {

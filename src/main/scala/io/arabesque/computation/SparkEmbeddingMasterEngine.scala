@@ -151,8 +151,13 @@ class SparkEmbeddingMasterEngine[E <: Embedding]
         case Success(previousAggregations) =>
 
           aggregations = mergeOrReplaceAggregations (aggregations, previousAggregations)
-          
+         
           logInfo (s"""Aggregations and sizes
+            ${aggregations.
+            map(tup => (tup._1,tup._2.getNumberMappings)).mkString("\n")}
+          """)
+
+          logDebug (s"""Aggregations and sizes
             ${aggregations.
             map(tup => (tup._1,tup._2)).mkString("\n")}
           """)

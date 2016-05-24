@@ -45,27 +45,29 @@ public class MotifSamplingComputation extends VertexInducedSamplingComputation<V
 
     @Override
     public void process(VertexInducedEmbedding embedding) {
-        if (getStep() > aggstep) {
+        if (getStep() > aggstep && 
+              embedding.getNumWords() >= 3 && embedding.getNumWords() <= 5) {
             output(embedding);
             map(AGG_MOTIFS, embedding.getPattern(), reusableLongWritableUnit);
-            //System.out.println (embedding);
+            System.out.println ("numWords = " + embedding.getNumWords() +
+                  " " + embedding);
         }
     }
     
-/*    @Override
+    @Override
     protected IntCollection getPossibleModifications(VertexInducedEmbedding embedding) {
-        IntCollection possibleModifications = new IntArrayList();
+       IntCollection possibleModifications;
 
-	if (embedding.getNumWords()<=3)
-		possibleModifications.addAll(getPossibleExtensions(embedding));
-        else if (embedding.getNumWords()==4) {
-		possibleModifications.addAll(getPossibleExtensions(embedding));
-		possibleModifications.addAll(getPossibleContractions(embedding));
-	}
-	else 
-		possibleModifications = getPossibleContractions(embedding);
-		
-        return possibleModifications;
+       if (embedding.getNumWords() <= 3) {
+          possibleModifications = getPossibleExtensions(embedding);
+          System.out.println ("size3 " + possibleModifications);
+       } else if (embedding.getNumWords() == 4) {
+          possibleModifications = getPossibleExtensions(embedding);
+          possibleModifications.addAll(getPossibleContractions(embedding));
+       } else {
+          possibleModifications = getPossibleContractions(embedding);
+       }
+
+       return possibleModifications;
     }
-*/
 }

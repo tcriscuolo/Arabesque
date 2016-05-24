@@ -56,27 +56,35 @@ public abstract class VertexInducedSamplingComputation<E extends VertexInducedEm
     public void filter(E existingEmbedding, IntCollection modificationPoints) {
 
 	int previousDegree = modificationPoints.size();
-        int a[] = modificationPoints.toIntArray();
-	int nextModification = a[r.nextInt(previousDegree)];
+        if (previousDegree == 0) {
+           existingEmbedding.reset();
+           return;
+        }
+
+        int rdIdx = r.nextInt(previousDegree);
+	int nextModification = modificationPoints.toIntArray()[rdIdx];
 	int degree = 1;
 	
 	//if expansion
             if (!currentEmbedding.existWord(nextModification)) {
                 currentEmbedding.addWord(nextModification);
-		modificationPoints = getPossibleModifications(currentEmbedding);
-                degree = modificationPoints.size();
+		IntCollection modPoints = getPossibleModifications(currentEmbedding);
+                degree = modPoints.size();
                 currentEmbedding.removeWord(nextModification);
             }
             //if contraction
             else {
                 currentEmbedding.removeWord(nextModification);
-		modificationPoints = getPossibleModifications(currentEmbedding);
-                degree = modificationPoints.size();
+		IntCollection modPoints = getPossibleModifications(currentEmbedding);
+                degree = modPoints.size();
                 currentEmbedding.addWord(nextModification);
             }
 
 
-	double accept = Math.min(1, previousDegree/degree);
+	//double accept = 1;
+        //if (degree > 0)
+        double accept = Math.min(1, (double) previousDegree/degree);
+
 
 	modificationPoints.clear();
 	

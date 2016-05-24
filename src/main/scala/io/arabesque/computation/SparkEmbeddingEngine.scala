@@ -305,6 +305,7 @@ case class SparkEmbeddingEngine[O <: Embedding](
     case Some(embeddingWriter) =>
       val resEmbedding = ResultEmbedding (embedding)
       embeddingWriter.append (NullWritable.get, resEmbedding)
+      numEmbeddingsOutput += 1
 
     case None =>
 
@@ -328,6 +329,8 @@ case class SparkEmbeddingEngine[O <: Embedding](
       
       val resEmbedding = ResultEmbedding (embedding)
       embeddingWriter.append (NullWritable.get, resEmbedding)
+
+      numEmbeddingsOutput += 1
   }
 
   /**
