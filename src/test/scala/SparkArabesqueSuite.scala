@@ -43,7 +43,7 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
     arab = new ArabesqueContext(sc)
 
     val loader = classOf[SparkArabesqueSuite].getClassLoader
-    val url = loader.getResource("sample.graph")
+    val url = loader.getResource("sample2.graph")
     sampleGraphPath = url.getPath
     arabGraph = arab.textFile (sampleGraphPath)
 
@@ -99,28 +99,14 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
 
   test ("[motifs,embedding,sampling] arabesque API") {
     val start = System.currentTimeMillis
-    val motifsRes = arabGraph.motifsSampling (3, 3, 10000).
+    val motifsRes = arabGraph.motifsSampling (3, 5, 100, 10000).
       set ("log_level", "debug").
       set ("comm_strategy", COMM_EMBEDDING)
-    //motifsRes.saveEmbeddingsAsTextFile ("file:///tmp/sampling.embeddings")
     val odags = motifsRes.odags
     assert (odags.count == 0)
     val embeddings = motifsRes.embeddings
     val end = System.currentTimeMillis
     println (s"elapsed time [motifs,embedding,sampling]: ${end - start}ms")
-  }
-
-  test ("[motifs,embedding,nosampling] arabesque API") {
-    val start = System.currentTimeMillis
-    val motifsRes = arabGraph.motifs (3).
-      set ("log_level", "debug").
-      set ("comm_strategy", COMM_EMBEDDING)
-    //motifsRes.saveEmbeddingsAsTextFile ("file:///tmp/nosampling.embeddings")
-    val odags = motifsRes.odags
-    assert (odags.count == 0)
-    val embeddings = motifsRes.embeddings
-    val end = System.currentTimeMillis
-    println (s"elapsed time [motifs,embedding,nosampling]: ${end - start}ms")
   }
 
   val motifsNumEmbeddings = 24546
