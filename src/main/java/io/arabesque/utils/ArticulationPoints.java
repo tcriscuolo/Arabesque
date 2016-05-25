@@ -3,6 +3,8 @@ package io.arabesque.utils;
 import io.arabesque.graph.MainGraph;
 import io.arabesque.embedding.Embedding;
 
+import io.arabesque.utils.IntArrayList;
+
 /**
  * This class is used to find articulation points in a subgraph, i.e., those
  * vertices in which their removal turn the subgraph disconnected.
@@ -14,8 +16,8 @@ public class ArticulationPoints {
    static final int NIL = -1;
 
    // must be set by setEmbedding or individually
-   private int[] vertices;
-   private int[] edges;
+   private IntArrayList vertices;
+   private IntArrayList edges;
 
    // are instantiated and reused for embeddings with the same size
    private boolean visited[];
@@ -40,13 +42,13 @@ public class ArticulationPoints {
    private void setFromEmbedding(Embedding embedding) {
       assert embedding.getNumVertices() == visited.length;
       reset();
-      this.vertices = embedding.getVertices().getBackingArray();
-      this.edges = embedding.getEdges().getBackingArray();
+      this.vertices = embedding.getVertices();
+      this.edges = embedding.getEdges();
    }
 
    public void reset() {
       time = 0;
-      for (int u = 0; u < vertices.length; ++u) {
+      for (int u = 0; u < vertices.size(); ++u) {
          parent[u] = NIL;
          visited[u] = false;
          ap[u] = false;
@@ -64,8 +66,9 @@ public class ArticulationPoints {
       disc[u] = low[u] = ++time;
 
       // Go through all vertices aadjacent to this
-      for (int v = 0; v < vertices.length; ++v) {
-         if (!mainGraph.isNeighborVertex(vertices[u], vertices[v]))
+      for (int v = 0; v < vertices.size(); ++v) {
+         if (!mainGraph.isNeighborVertex(vertices.getUnchecked(u),
+                  vertices.getUnchecked(v)))
             continue;
 
          // If v is not visited yet, then make it a child of u
@@ -99,7 +102,7 @@ public class ArticulationPoints {
 
    public boolean[] articulationPoints(Embedding embedding) {
       setFromEmbedding(embedding);
-      for (int u = 0; u < vertices.length; ++u)
+      for (int u = 0; u < vertices.size(); ++u)
          if (visited[u] == false)
             articulationPointsRec(u);
 
