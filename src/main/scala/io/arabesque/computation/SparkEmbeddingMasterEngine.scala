@@ -162,6 +162,11 @@ class SparkEmbeddingMasterEngine[E <: Embedding]
             map(tup => (tup._1,tup._2)).mkString("\n")}
           """)
 
+          for ((k,agg) <- aggregations.iterator) {
+            val patternMapping = agg.getMapping
+            logDebug (s"patterns: ${patternMapping.mkString(";")}")
+          }
+
           previousAggregationsBc.unpersist()
           previousAggregationsBc = sc.broadcast (aggregations)
 

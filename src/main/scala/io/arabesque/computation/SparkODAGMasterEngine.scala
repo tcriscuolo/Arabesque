@@ -168,6 +168,16 @@ class SparkODAGMasterEngine[E <: Embedding](config: SparkConfiguration[E])
             map(tup => (tup._1,tup._2.getNumberMappings)).mkString("\n")}
           """)
 
+          logDebug (s"""Aggregations and sizes
+            ${aggregations.
+            map(tup => (tup._1,tup._2)).mkString("\n")}
+          """)
+
+          for ((k,agg) <- aggregations.iterator) {
+            val patternMapping = agg.getMapping
+            logDebug (s"patterns: ${patternMapping.mkString("\n")}")
+          }
+
           previousAggregationsBc.unpersist()
           previousAggregationsBc = sc.broadcast (previousAggregations)
 

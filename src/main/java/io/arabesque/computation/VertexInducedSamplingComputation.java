@@ -81,10 +81,7 @@ public abstract class VertexInducedSamplingComputation<E extends VertexInducedEm
             }
 
 
-	//double accept = 1;
-        //if (degree > 0)
         double accept = Math.min(1, (double) previousDegree/degree);
-
 
 	modificationPoints.clear();
 	

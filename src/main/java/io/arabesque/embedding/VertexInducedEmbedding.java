@@ -1,6 +1,7 @@
 package io.arabesque.embedding;
 
 import io.arabesque.utils.collection.IntArrayList;
+import io.arabesque.utils.ArticulationPoints;
 import io.arabesque.graph.Edge;
 import net.openhft.koloboke.collect.IntCollection;
 import net.openhft.koloboke.collect.set.hash.HashIntSet;
@@ -19,6 +20,10 @@ public class VertexInducedEmbedding extends BasicEmbedding {
     // Edge tracking for incremental modifications {{
     private IntArrayList numEdgesAddedWithWord;
     // }}
+    //
+
+    // finding the articulation points in the embedding
+    private ArticulationPoints articRunner;
 
     @Override
     protected void init() {
@@ -89,55 +94,16 @@ public class VertexInducedEmbedding extends BasicEmbedding {
     }
 
     protected IntCollection getValidElementsForContraction(int vertexId) {
-        Integer cnt = 0;
+       if (articRunner == null)
+          articRunner = new ArticulationPoints(mainGraph);
 
-        int numVertices = vertices.size();
+       boolean[] ap = articRunner.articulationPoints (this);
+       IntArrayList contractions = new IntArrayList();
 
-        int [] low = new int[numVertices];
-        int [] pre = new int[numVertices];
-        int [] dgr = new int[numVertices];
+       for (int i = 0; i < vertices.size(); ++i)
+          if (!ap[i]) contractions.add(vertices.getUnchecked(i));
 
-        for (int i = 0; i < numVertices; ++i) {
-            low[i] = pre[i] = dgr[i] = -1;
-        }
-
-        HashIntSet bridgeElems = HashIntSets.newMutableSet();
-        // TODO: can I consider it begins at position 0 ???
-        dfsForBridgeDetection(0, 0, low, pre, dgr, bridgeElems, cnt);
-        IntCollection elems = new IntArrayList();
-
-        for (int i = 0; i < numVertices; ++i) {
-            if (dgr[i]==0 || !bridgeElems.contains(vertices.getUnchecked(i)))
-                elems.add(vertices.getUnchecked(i));
-
-        }
-        return elems;
-    }
-
-    private void dfsForBridgeDetection(int u, int v, int[] low, int[] pre, int[] dgr, HashIntSet elems, Integer cnt) {
-        pre[v] = cnt++;
-        low[v] = pre[v];
-        //for (int w : vertices) {
-        for (int w = 0; w < vertices.size(); w++) {
-            //if (areWordsNeighbours(w, v)) {
-            if (areWordsNeighbours(vertices.getUnchecked(w),
-                     vertices.getUnchecked(v))) {
-                dgr[v]++;
-                if (pre[w] == -1) {
-                    dfsForBridgeDetection(v, w, low, pre, dgr, elems, cnt);
-                    low[v] = Math.min(low[v], low[w]);
-                    if (low[w] == pre[w]) {
-                        //elems.add(v);
-                        elems.add(vertices.getUnchecked(v));
-                        //elems.add(w);
-                        elems.add(vertices.getUnchecked(w));
-                    }
-                }
-                // update low number - ignore reverse of edge leading to v
-                else if (w != u)
-                    low[v] = Math.min(low[v], pre[w]);
-            }
-        }
+       return contractions;
     }
 
     @Override
@@ -175,7 +141,7 @@ public class VertexInducedEmbedding extends BasicEmbedding {
         int numWords = words.size();
 
         int idx = 0;
-        while (idx < numWords-1) {
+        while (idx < numWords) {
             if (word == words.getUnchecked(idx))
                 break;
             idx++;
@@ -232,14 +198,18 @@ public class VertexInducedEmbedding extends BasicEmbedding {
      * @param positionDeleted the idx of the vertex that was just deleted.
      */
     private void updateEdgesDeletion(int positionDeleted) {
-        //int firstIdx = 0;
+       int bla = 0;
+        for (int i = 0; i < getNumEdges(); i++) {
+              Edge edge = mainGraph.getEdge(edges.getUnchecked(i));
+              if (edge.hasVertex(vertices.getUnchecked(positionDeleted))) {
+               bla++;
+            }
+        }
 
-        ////compute first edge idx to be deleted
-        //for (int i = 0; i <= positionDeleted; ++i) {
-        //    firstIdx += numEdgesAddedWithWord.getUnchecked(i);
-        //}
+         if (getNumEdges()-bla < getNumVertices()-2) 
+            throw new RuntimeException (this.getPattern() + " pau na logica " + (getNumEdges()-bla) + " " + (getNumVertices()-2) + " " + bla);
+            
 
-        //int j = firstIdx, i = positionDeleted+1;
         int j = 0, i = 0;
         while (i < getNumWords()) {
            int target = j + numEdgesAddedWithWord.getUnchecked(i);
@@ -256,6 +226,8 @@ public class VertexInducedEmbedding extends BasicEmbedding {
            }
            i++;
         }
+
+
 
         numEdgesAddedWithWord.remove(positionDeleted);
     }

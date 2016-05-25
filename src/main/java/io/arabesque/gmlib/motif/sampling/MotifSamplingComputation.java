@@ -3,6 +3,7 @@ package io.arabesque.gmlib.motif.sampling;
 import io.arabesque.aggregation.reductions.LongSumReduction;
 import io.arabesque.computation.VertexInducedSamplingComputation;
 import io.arabesque.conf.Configuration;
+import io.arabesque.pattern.Pattern;
 import io.arabesque.embedding.VertexInducedEmbedding;
 import io.arabesque.utils.collection.IntArrayList;
 import net.openhft.koloboke.collect.IntCollection;
@@ -47,7 +48,7 @@ public class MotifSamplingComputation extends VertexInducedSamplingComputation<V
     public void process(VertexInducedEmbedding embedding) {
         if (getStep() > aggstep && 
               embedding.getNumWords() >= 3 && embedding.getNumWords() <= 5) {
-            output(embedding);
+           output(embedding);
             map(AGG_MOTIFS, embedding.getPattern(), reusableLongWritableUnit);
         }
     }
