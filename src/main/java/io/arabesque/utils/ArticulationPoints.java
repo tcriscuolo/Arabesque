@@ -3,7 +3,7 @@ package io.arabesque.utils;
 import io.arabesque.graph.MainGraph;
 import io.arabesque.embedding.Embedding;
 
-import io.arabesque.utils.IntArrayList;
+import io.arabesque.utils.collection.IntArrayList;
 
 /**
  * This class is used to find articulation points in a subgraph, i.e., those
