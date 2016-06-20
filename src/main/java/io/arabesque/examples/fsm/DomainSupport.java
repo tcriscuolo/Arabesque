@@ -16,12 +16,7 @@ import net.openhft.koloboke.collect.set.hash.HashIntSet;
 import net.openhft.koloboke.collect.set.hash.HashIntSets;
 import org.apache.hadoop.io.Writable;
 
-import java.io.DataInput;
-import java.io.ObjectInput;
-import java.io.DataOutput;
-import java.io.ObjectOutput;
-import java.io.IOException;
-import java.io.Externalizable;
+import java.io.*;
 import java.util.Arrays;
 
 public class DomainSupport implements Writable, Externalizable, PatternAggregationAwareValue {
@@ -157,9 +152,9 @@ public class DomainSupport implements Writable, Externalizable, PatternAggregati
         setFromEmbedding = false;
         embedding = null;
     }
-    
+
     public void writeExternal(ObjectOutput objOutput) throws IOException {
-       write (objOutput);
+        write (objOutput);
     }
 
     @Override
@@ -199,7 +194,7 @@ public class DomainSupport implements Writable, Externalizable, PatternAggregati
 
     @Override
     public void readExternal(ObjectInput objInput) throws IOException, ClassNotFoundException {
-       readFields (objInput);
+        readFields (objInput);
     }
 
     @Override

@@ -12,7 +12,7 @@ import io.arabesque.conf.{Configuration, SparkConfiguration}
 import io.arabesque._
 
 // TODO: break these tests into several *suites*
-class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
+class CubeGraphSuit extends FunSuite with BeforeAndAfterAll {
 
   private val master = "local[2]"
   private val appName = "arabesque-spark"
@@ -39,11 +39,8 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
     sc = new SparkContext(conf)
     arab = new ArabesqueContext(sc)
 
-    val loader = classOf[SparkArabesqueSuite].getClassLoader
-    val url = loader.getResource("sample.graph")
-    sampleGraphPath = url.getPath
+    sampleGraphPath = "data/cube.graph"
     arabGraph = arab.textFile (sampleGraphPath)
-
   }
 
   /** stop spark context */
@@ -63,7 +60,7 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
       "input_graph_path" -> sampleGraphPath,
       "input_graph_local" -> true,
       "computation" -> "io.arabesque.computation.BasicComputation"
-      )
+    )
     val sparkConfig = new SparkConfiguration (confs)
 
     assert (!sparkConfig.isInitialized)
@@ -95,40 +92,76 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
   }
 
   test ("[motifs] arabesque API") {
-    val motifsRes = arabGraph.motifs (4).
-      set ("output_path", s"target/${sc.applicationId}/Motifs_Output").
-      set ("log_level", "debug")
-    val odags = motifsRes.odags
-    val embeddings = motifsRes.embeddings
-    //assert (odags.count == 2)
-    //assert (embeddings.count == 24546)
+    // Test output for motifs for embedding with size 0 to 3
+
+    // Expected output
+    val numEmbedding = List(0, 8, 12, 24)
+
+    for(k <- 0 to 3) {
+      val motifsRes = arabGraph.motifs(k).
+        set ("output_path", s"target/${sc.applicationId}/CubeMotifs_Output").
+        set ("log_level", "debug")
+      val odags = motifsRes.odags
+      val embeddings = motifsRes.embeddings
+
+      assert(embeddings.count == numEmbedding(k))
+
+    }
+
   }
 
-  //test ("[fsm] arabesque API") {
-  //  val fsmRes = arabGraph.fsm (100, 3).
-  //    set ("output_path", s"target/${sc.applicationId}/FSM_Output")
-  //  val odags = fsmRes.odags
-  //  val embeddings = fsmRes.embeddings
-  //  assert (odags.count == 3)
-  //  assert (embeddings.count == 31414)
-  //}
+  test ("[clique] arabesque API") {
+    // Test output for clique for embeddings with size 1 to 3
+    // Expected output
+    val numEmbedding = List(8, 12, 0)
 
-  //test ("[triangles] arabesque API") {
-  //  val trianglesRes = arabGraph.triangles().
-  //    set ("output_path", s"target/${sc.applicationId}/Triangles_Output")
-  //  val odags = trianglesRes.odags
-  //  val embeddings = trianglesRes.embeddings
-  //  assert (odags.count == 2)
-  //  assert (embeddings.count == 0)
-  //}
+    for(k <- 1 to 3) {
+      val cliqueRes = arabGraph.cliques(k).
+        set ("output_path", s"target/${sc.applicationId}/CubeCliques_Output").
+        set ("log_level", "debug")
+      val embeddings = cliqueRes.embeddings
 
-  //test ("[cliques] arabesque API") {
-  //  val cliquesRes = arabGraph.cliques (3).
-  //    set ("output_path", s"target/${sc.applicationId}/Cliques_Output")
-  //  val odags = cliquesRes.odags
-  //  val embeddings = cliquesRes.embeddings
-  //  assert (odags.count == 2)
-  //  assert (embeddings.count == 1166)
-  //}
+      assert(embeddings.count == numEmbedding(k - 1))
+
+    }
+
+  }
+
+
+  test ("[fsm] arabesque API") {
+    // Critical test
+    // Test output for fsm with support 2 for embeddings with size 2 to 3
+    val support = 2
+
+    // Expected output
+    val numEmbedding = List(9, 24)
+
+    for(k <- 2 to 3) {
+      val motifsRes = arabGraph.fsm(support, k).
+        set ("output_path", s"target/${sc.applicationId}/CubeFsm_Output").
+        set ("log_level", "debug")
+
+      val embeddings = motifsRes.embeddings
+
+      assert(embeddings.count == numEmbedding(k - 2))
+
+    }
+
+  }
+
+
+  test ("[triangles] arabesque API") {
+    // Test output for triangles
+
+    // Expected output
+    val numTriangles = 0
+
+    val trianglesRes = arabGraph.triangles().
+      set ("output_path", s"target/${sc.applicationId}/CubeTriangles_Output").
+      set ("log_level", "debug")
+    val embeddings = trianglesRes.embeddings
+
+    assert(embeddings.count == numTriangles)
+  }
 
 }

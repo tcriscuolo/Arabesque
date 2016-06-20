@@ -112,4 +112,27 @@ class ArabesqueGraph(
     config.set ("computation", "io.arabesque.gmlib.clique.CliqueComputation")
     cliques (config)
   }
+
+  /** k-plex*/
+  def kplex(config: SparkConfiguration[_ <: Embedding]): ArabesqueResult = {
+    resultHandler (config)
+  }
+
+  /**
+    * Computes k-plex
+    *
+    * @param maxSize target k-plex size
+    * @param k       k-plex value
+    * @return an [[io.arabesque.ArabesqueResult]] carrying odags and embeddings
+    */
+  def kplex(maxSize: Int, k: Int): ArabesqueResult = {
+    val config = new SparkConfiguration
+    config.set ("input_graph_path", path)
+    config.set ("input_graph_local", local)
+    config.set ("output_path", "Kplex_Output")
+    config.set ("arabesque.kplex.maxsize", maxSize)
+    config.set ("arabesque.kplex.k", k)
+    config.set ("computation", "io.arabesque.gmlib.kplex.KplexComputation")
+    kplex (config)
+  }
 }
