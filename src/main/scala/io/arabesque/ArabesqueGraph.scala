@@ -114,4 +114,29 @@ class ArabesqueGraph(
     config.set ("computation", "io.arabesque.gmlib.clique.CliqueComputation")
     cliques (config)
   }
+
+  /** kplex */
+  def kplex(config: SparkConfiguration[_ <: Embedding]): ArabesqueResult[_] = {
+    resultHandler (config)
+  }
+
+  /**
+    * Computes graph kplex
+    *
+    * @param k kplex relaxation value
+    * @param maxSize target clique size
+    *
+    * @return an [[io.arabesque.ArabesqueResult]] carrying odags and embeddings
+    */
+  def kplex(k: Int, maxSize: Int): ArabesqueResult[_] = {
+    val config = new SparkConfiguration [VertexInducedEmbedding]
+    config.set ("input_graph_path", path)
+    config.set ("input_graph_local", local)
+    config.set ("output_path", s"${tmpPath}/kplex-${config.getUUID}")
+    config.set ("arabesque.kplex.k", k)
+    config.set ("arabesque.kplex.maxsize", maxSize)
+    config.set ("computation", "io.arabesque.gmlib.kplex.KplexComputation")
+    cliques (config)
+  }
+
 }

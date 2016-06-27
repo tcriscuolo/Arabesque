@@ -5,6 +5,11 @@ import io.arabesque.conf.Configuration;
 import io.arabesque.embedding.VertexInducedEmbedding;
 import io.arabesque.graph.MainGraph;
 import io.arabesque.utils.collection.IntArrayList;
+import org.apache.commons.lang.mutable.Mutable;
+import org.apache.commons.lang.mutable.MutableInt;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class KplexComputation extends VertexInducedComputation<VertexInducedEmbedding> {
@@ -35,23 +40,38 @@ public class KplexComputation extends VertexInducedComputation<VertexInducedEmbe
         if(numVertices <= k) {
             return true;
         } else {
-            // Get embedding vertices and edge list
-            IntArrayList embVertices = embedding.getVertices();
 
+            // Check if the last vertex added to the embedding has a minimum degree
+            if(!(embedding.getNumEdgesAddedWithExpansion() >= numVertices - k)) {
+                return false;
+            }
+
+            // Get embedding vertices and load main graph
+            IntArrayList embVertices = embedding.getVertices();
             MainGraph graph = getMainGraph();
+
             // For each vertex count how many neighbours it has on the embedding
+            HashMap<Integer, MutableInt> vertexDegree = new HashMap<Integer, MutableInt>();
+
+            // Initialize HashMap values as 0
+            for (int vertexId: embVertices) {
+                vertexDegree.put(vertexId, new MutableInt(0));
+            }
+
             for(int i = 0; i < numVertices; i++) {
-                int neighbourCount = 0;
                 int vertexA = embVertices.get(i);
-                for (int j = 0; j < numVertices; j++) {
+
+                for (int j = i + 1; j < numVertices; j++) {
                     int vertexB = embVertices.get(j);
 
                     if(graph.isNeighborVertex(vertexA, vertexB)) {
-                        neighbourCount++;
+                        vertexDegree.get(vertexA).increment();
+                        vertexDegree.get(vertexB).increment();
                     }
                 }
+
                 // Check if it is not a kplex
-                if(!(neighbourCount >= numVertices - k)) {
+                if(!(vertexDegree.get(vertexA).toInteger() >= numVertices - k)) {
                     return false;
                 }
             }
@@ -59,6 +79,7 @@ public class KplexComputation extends VertexInducedComputation<VertexInducedEmbe
             return true;
         }
     }
+
 
     @Override
     public boolean shouldExpand(VertexInducedEmbedding embedding) {
