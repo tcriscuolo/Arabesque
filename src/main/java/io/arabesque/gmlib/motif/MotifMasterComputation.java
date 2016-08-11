@@ -1,45 +1,42 @@
 package io.arabesque.gmlib.motif;
 
-import io.arabesque.aggregation.reductions.LongSumReduction;
-import io.arabesque.computation.VertexInducedComputation;
+import io.arabesque.aggregation.AggregationStorage;
+import io.arabesque.computation.MasterComputation;
 import io.arabesque.conf.Configuration;
-import io.arabesque.embedding.VertexInducedEmbedding;
+import io.arabesque.pattern.Pattern;
 import org.apache.hadoop.io.LongWritable;
 
-public class MotifComputation extends VertexInducedComputation<VertexInducedEmbedding> {
-    public static final String AGG_MOTIFS = "motifs";
-    private static final String MAXSIZE = "arabesque.motif.maxsize";
-    private static final int MAXSIZE_DEFAULT = 4;
+public class MotifMasterComputation extends MasterComputation {
 
-    private static LongWritable reusableLongWritableUnit = new LongWritable(1);
+    private static final String MAXSTEP = "arabesque.motif.maxstep";
+    private static final int MAXTSTEP_DEFAULT = 5;
+    private int PATTERNS_FOUND = 0;
 
-    private int maxsize;
+    private int maxstep;
 
     @Override
     public void init() {
-        super.init();
-        maxsize = Configuration.get().getInteger(MAXSIZE, MAXSIZE_DEFAULT);
+        maxstep = Configuration.get().getInteger(MAXSTEP, MAXTSTEP_DEFAULT);
     }
 
     @Override
-    public void initAggregations() {
-        super.initAggregations();
+    public void compute() {
+        System.out.println("Master computing");
 
-        Configuration conf = Configuration.get();
+        AggregationStorage<Pattern, LongWritable> aggregationStorage =
+                readAggregation(MotifComputation.AGG_MOTIFS);
 
-        conf.registerAggregation(AGG_MOTIFS, conf.getPatternClass(), LongWritable.class, true, new LongSumReduction());
-    }
+        System.out.println("Aggregation Storage: " + aggregationStorage);
 
-    @Override
-    public boolean shouldExpand(VertexInducedEmbedding embedding) {
-        return embedding.getNumVertices() < maxsize;
-    }
+        if (aggregationStorage.getNumberMappings() > 0) {
+            System.out.println("Patterns :");
 
-    @Override
-    public void process(VertexInducedEmbedding embedding) {
-        if (embedding.getNumWords() == maxsize) {
-            output(embedding);
-            map(AGG_MOTIFS, embedding.getPattern(), reusableLongWritableUnit);
+            for (Pattern pattern : aggregationStorage.getKeys()) {
+                System.out.println("P#" + PATTERNS_FOUND + ": [Size: " + pattern.getNumberOfVertices() + "," + pattern + "] : " + aggregationStorage.getValue(pattern));
+                PATTERNS_FOUND++;
+            }
+        } else if (getStep() > 0) {
+            System.out.println("Empty.");
         }
     }
 }

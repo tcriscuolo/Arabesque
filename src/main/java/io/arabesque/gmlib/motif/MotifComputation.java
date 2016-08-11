@@ -37,7 +37,7 @@ public class MotifComputation extends VertexInducedComputation<VertexInducedEmbe
 
     @Override
     public void process(VertexInducedEmbedding embedding) {
-        if (embedding.getNumWords() == maxsize) {
+        if (embedding.getNumWords() <= maxsize && embedding.getNumWords() > 2) {
             output(embedding);
             map(AGG_MOTIFS, embedding.getPattern(), reusableLongWritableUnit);
         }

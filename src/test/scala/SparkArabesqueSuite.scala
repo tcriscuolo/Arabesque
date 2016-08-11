@@ -85,8 +85,7 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
 
    assert (conds.reduce (_ && _))
 
- }
-
+ }/*
  val motifsNumEmbeddings = 24546
  test ("[motifs,odag] arabesque API") {
    val motifsRes = arabGraph.motifs (3).
@@ -108,7 +107,7 @@ class SparkArabesqueSuite extends FunSuite with BeforeAndAfterAll {
    assert (embeddings.count == motifsNumEmbeddings)
    assert (embeddings.distinct.count == motifsNumEmbeddings)
  }
-
+ */
  val fsmNumEmbeddings = 31414
  test ("[fsm,odag] arabesque API") {
    val fsmRes = arabGraph.fsm (100, 3).

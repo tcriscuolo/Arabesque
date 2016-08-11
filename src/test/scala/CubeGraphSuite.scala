@@ -44,7 +44,7 @@ class CubeGraphSuite extends FunSuite with BeforeAndAfterAll {
       arab.stop()
     }
   }
-
+    /*
   test ("[motifs] arabesque API") {
     // Test output for motifs for embedding with size 0 to 3
 
@@ -60,7 +60,7 @@ class CubeGraphSuite extends FunSuite with BeforeAndAfterAll {
       assert(embeddings.count() == numEmbedding(k))
     }
 
-  }
+  }*/
 
   test ("[clique] arabesque API") {
     // Test output for clique for embeddings with size 1 to 3
@@ -114,3 +114,5 @@ class CubeGraphSuite extends FunSuite with BeforeAndAfterAll {
   }
 
 }
+
+
